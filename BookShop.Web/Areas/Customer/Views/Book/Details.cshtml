@@ -1,0 +1,233 @@
+﻿@model BookShop.Application.ViewModels.Common.BookDetailsPageResponseVM
+
+@{
+    ViewData["Title"] = "Book Details";
+}
+
+
+<div class="container py-4 py-md-5">
+    <!-- Back Button -->
+    <div class="row mb-4">
+        <div class="col">
+            <a asp-area="Customer" asp-controller="Book" asp-action="Index"
+                class="btn btn-link link-secondary text-decoration-none p-0 d-inline-flex align-items-center gap-2 fw-semibold">
+                <i class="bi bi-arrow-left"></i> Back to Catalog
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Details Row -->
+    <div class="row g-4 g-lg-5 mb-5">
+        <!-- Left Column: Image -->
+        <div class="col-md-6">
+            <div class="sticky-md-top pt-md-2">
+                <div class="shadow-sm rounded-4 overflow-hidden border border-light-subtle bg-light" style="height: 600px;">
+                    <img src="@Model.Book.ImageUrl" alt="@Model.Book.Title"
+                         class="img-fluid w-100 h-100" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Column: Info & Actions -->
+        <div class="col-md-6 d-flex flex-column justify-content-between">
+            <div class="mb-4">
+                <div class="mb-3 d-flex gap-2">
+                    <span class="badge bg-body-secondary text-dark border border-secondary-subtle rounded-pill px-3 py-2 text-uppercase fw-semibold"
+                          style="font-size: 0.75rem;">
+                        <i class="bi bi-tag-fill me-1 text-primary"></i> @Model.Book.CategoryName
+                    </span>
+
+                    <!-- New Arrival -->
+                    @if (Model.Book.IsNewArrival)
+                    {
+                        <span class="badge bg-success-subtle text-success border border-success-subtle rounded-pill px-3 py-2 text-uppercase fw-semibold"
+                              style="font-size: 0.75rem;">
+                            New Arrival
+                        </span>
+                    }
+                </div>
+
+                <h1 class="fw-bold text-dark mb-2 display-6">@Model.Book.Title</h1>
+                <p class="text-secondary fw-medium mb-3">By <span class="text-dark">@Model.Book.AuthorName</span></p>
+                <p class="text-secondary fs-5 fw-medium mb-3">ISBN : <span class="text-dark">@Model.Book.ISBN</span></p>
+
+                <!-- Pricing -->
+                <div class="d-flex align-items-baseline gap-3 mb-4">
+
+                    <!-- Special Pricing -->
+                    @if(Model.Book.SpecialPrice.HasValue && Model.Book.SpecialPrice < Model.Book.Price)
+                    {
+                        <span class="fs-1 fw-bold text-danger">
+                            $@Model.Book.SpecialPrice.Value.ToString("F2")
+                        </span>
+                        <span class="fs-4 text-body-tertiary text-decoration-line-through fw-light">
+                            $@Model.Book.Price.ToString("F2")
+                        </span>
+                        <span class="badge bg-danger-subtle text-danger rounded-pill px-2 py-1 fs-6 fw-semibold">
+                            PROMO
+                        </span>
+                    }
+                    else
+                    {
+                        <!-- Price -->
+                        <span class="fs-1 fw-bold text-dark">$@Model.Book.Price.ToString("F2")</span>
+                    }
+                </div>
+
+                <hr class="my-4 opacity-25" />
+
+                <h6 class="text-uppercase fw-bold text-secondary-emphasis mb-2 small">Description</h6>
+                <p class="text-muted lh-lg fs-6 mb-4">@Model.Book.Description</p>
+
+                <!-- Book Metadata Blocks -->
+                <div class="row g-2 mb-4">
+                    <div class="col-6">
+                        <div class="p-3 border border-light-subtle rounded-3 bg-light-subtle">
+                            <span class="text-muted d-block text-uppercase small">Pages</span>
+                            <span class="fw-semibold text-dark">
+                                <i class="bi bi-book me-1"></i> @Model.Book.PageNumber Pages
+                            </span>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 border border-light-subtle rounded-3 bg-light-subtle">
+                            <span class="text-muted d-block text-uppercase small">Stock Status</span>
+                            <span class="fw-semibold text-dark">
+                                <i class="bi bi-box-seam me-1"></i>
+                                @(Model.Book.Stock > 0 ? $"{Model.Book.Stock} Available" : "Out of Stock")
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quantity & Add to Cart Box -->
+            <div class="p-4 bg-body border border-light-subtle rounded-4 shadow-sm">
+                <form asp-area="Customer" asp-controller="ShoppingCart" asp-action="Add"
+                method="post">
+
+                    <input type="hidden" name="bookId" value="@Model.Book.Id"/>
+                    <div class="row g-3 align-items-end">
+
+                        <!-- Quantity Selector -->
+                        <div class="col-sm-5">
+                            <label for="quantity"
+                                   class="form-label text-dark small fw-bold mb-2">
+                                Select Quantity
+                            </label>
+
+                            <div class="d-flex align-items-center border border-secondary-subtle rounded-3 bg-light p-1">
+
+                                <button type="button"
+                                        class="btn btn-link text-dark shadow-none p-2"
+                                        id="btn-minus">
+                                    <i class="bi bi-dash-lg"></i>
+                                </button>
+
+                                <input type="number"
+                                       id="cartQty"
+                                       name="quantity"
+                                       value="1"
+                                       min="1"
+                                       class="form-control text-center fw-bold border-0 bg-transparent shadow-none"
+                                       required />
+
+                                <button type="button"
+                                        class="btn btn-link text-dark shadow-none p-2"
+                                        id="btn-plus">
+                                    <i class="bi bi-plus-lg"></i>
+                                </button>
+
+                            </div>
+                        </div>
+
+                        <!-- Add to Cart Button -->
+                        <div class="col-sm-7">
+                            <button type="submit"
+                                    class="btn btn-primary btn-lg w-100 rounded-3 fw-bold py-2 d-flex align-items-center
+                                justify-content-center gap-2 fs-6 shadow">
+                                <i class="bi bi-bag-plus"></i>
+                                Add to Cart
+                            </button>
+                        </div>
+
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Similar Books Section with Owl Carousel -->
+    @if(Model.SimilarBooks != null && Model.SimilarBooks.Any())
+    {
+        <div class="row mt-5 pt-4 border-top border-light-subtle">
+            <div class="col-12 d-flex justify-content-between align-items-center mb-4">
+                <h3 class="fw-bold text-dark m-0">You May Also Like</h3>
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-secondary btn-sm rounded-circle" id="similar-prev">
+                        <i class="bi bi-chevron-left"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm rounded-circle" id="similar-next">
+                        <i class="bi bi-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="col-12">
+                <div class="owl-carousel owl-theme" id="similarBooksCarousel">
+                    @await Html.PartialAsync("_BookCard" , Model.SimilarBooks)
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+
+            // Quantity Increment/Decrement
+            var qtyInput = $('#cartQty');
+
+            $('#btn-plus').click(function() {
+                var currentValue = parseInt(qtyInput.val());
+                qtyInput.val(currentValue + 1);
+            });
+
+            $('#btn-minus').click(function() {
+                var currentValue = parseInt(qtyInput.val());
+                if (currentValue > 1) {
+                    qtyInput.val(currentValue - 1);
+                }
+            });
+
+           
+            // Similar Books Carousel Initialization
+            var $similarCarousel = $('#similarBooksCarousel');
+
+            if ($similarCarousel.length) {
+                $similarCarousel.owlCarousel({
+                    loop: false,
+                    margin: 20,
+                    nav: false,
+                    dots: false,
+                    autoplay: false,
+                    responsive: {
+                        0: { items: 1 },
+                        576: { items: 2 },
+                        992: { items: 3 },
+                        1200: { items: 4 }
+                    }
+                });
+
+                $('#similar-prev').on('click', function() {
+                    $similarCarousel.trigger('prev.owl.carousel');
+                });
+
+                $('#similar-next').on('click', function() {
+                    $similarCarousel.trigger('next.owl.carousel');
+                });
+            }
+        });
+    </script>
+}
